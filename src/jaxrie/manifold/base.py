@@ -47,72 +47,78 @@ class Manifold(metaclass=ABCMeta):
 
   @staticmethod
   @abstractmethod
-  def add(x: Array, y: Array, k: ArrayLike, eps: float) -> Array:
+  def add(x: Array, y: Array, k: ArrayLike, eps: float = EPS) -> Array:
     """Addition on manifold with curvature k."""
     raise NotImplementedError
 
   @staticmethod
   @abstractmethod
-  def sub(x: Array, y: Array, k: ArrayLike, eps: float) -> Array:
+  def adde(x: Array, y: Array, k: ArrayLike, eps: float = EPS) -> Array:
+    """Addition on manifold (left H, right E) with curvature k."""
+    raise NotImplementedError
+
+  @staticmethod
+  @abstractmethod
+  def sub(x: Array, y: Array, k: ArrayLike, eps: float = EPS) -> Array:
     """Subtraction on manifold with curvature k."""
     raise NotImplementedError
 
   @staticmethod
   @abstractmethod
-  def mul(r: Array, x: Array, k: ArrayLike, eps: float) -> Array:
+  def mul(r: Array, x: Array, k: ArrayLike, eps: float = EPS) -> Array:
     """Scala multiplication on manifold with curvature k."""
     raise NotImplementedError
 
   @staticmethod
   @abstractmethod
-  def matvec(m: Array, x: Array, k: ArrayLike, eps: float) -> Array:
+  def matvec(m: Array, x: Array, k: ArrayLike, eps: float = EPS) -> Array:
     """Matrix vector multiplication on manifold with curvature k."""
     raise NotImplementedError
 
   @staticmethod
   @abstractmethod
-  def matmul(x1: Array, x2: Array, k: ArrayLike, eps: float) -> Array:
+  def matmul(x1: Array, x2: Array, k: ArrayLike, eps: float = EPS) -> Array:
     """Matrix multiplication on manifold with curvature k."""
     raise NotImplementedError
 
   @staticmethod
   @abstractmethod
-  def matmull(x1: Array, x2: Array, k: ArrayLike, eps: float) -> Array:
+  def matmull(x1: Array, x2: Array, k: ArrayLike, eps: float = EPS) -> Array:
     """Matrix multiplication (left H, right E) with curvature k."""
     raise NotImplementedError
 
   @staticmethod
   @abstractmethod
-  def matmulr(x1: Array, x2: Array, k: ArrayLike, eps: float) -> Array:
+  def matmulr(x1: Array, x2: Array, k: ArrayLike, eps: float = EPS) -> Array:
     """Matrix multiplication (left E, right H) with curvature k."""
     raise NotImplementedError
 
   @staticmethod
   @abstractmethod
-  def expmap(x: Array, y: Array, k: ArrayLike, eps: float) -> Array:
+  def expmap(x: Array, y: Array, k: ArrayLike, eps: float = EPS) -> Array:
     """Exponential map on manifold with curvature k."""
     raise NotImplementedError
 
   @staticmethod
   @abstractmethod
-  def logmap(x: Array, y: Array, k: ArrayLike, eps: float) -> Array:
+  def logmap(x: Array, y: Array, k: ArrayLike, eps: float = EPS) -> Array:
     """Logarithm map on manifold with curvature k."""
     raise NotImplementedError
 
   @staticmethod
   @abstractmethod
-  def expmap0(u: Array, k: ArrayLike, eps: float) -> Array:
+  def expmap0(u: Array, k: ArrayLike, eps: float = EPS) -> Array:
     """Exponential map on manifold with curvature k."""
     raise NotImplementedError
 
   @staticmethod
   @abstractmethod
-  def logmap0(y: Array, k: ArrayLike, eps: float) -> Array:
+  def logmap0(y: Array, k: ArrayLike, eps: float = EPS) -> Array:
     """Logarithm map on manifold with curvature k."""
     raise NotImplementedError
 
   @staticmethod
   @abstractmethod
-  def egrad2rgrad(x: Array, grad: Array, k: ArrayLike, eps: float) -> Array:
+  def egrad2rgrad(x: Array, grad: Array, k: ArrayLike, eps: float = EPS) -> Array:
     """Euclidean gradient to Riemannian gradient."""
     raise NotImplementedError

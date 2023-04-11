@@ -48,7 +48,7 @@ import jax
 
 # Local
 from .base import Manifold
-from .math import (EPS, mobius_add, mobius_matmulh, mobius_matmull,
+from .math import (EPS, mobius_add, mobius_adde, mobius_matmulh, mobius_matmull,
                    mobius_matmulr, mobius_matvec_mul, mobius_scala_mul,
                    stereo_egrad2rgrad, stereo_expmap, stereo_expmap0,
                    stereo_logmap, stereo_logmap0)
@@ -64,6 +64,12 @@ class Stereographic(Manifold):
   def add(x: Array, y: Array, k: ArrayLike, eps: float = EPS) -> Array:
     """Mobius addition on manifold with curvature k."""
     return mobius_add(x, y, k, eps)
+
+  @staticmethod
+  @partial(jax.jit, static_argnames=("eps",), inline=True)
+  def adde(x: Array, y: Array, k: ArrayLike, eps: float = EPS) -> Array:
+    """Mobius addition on manifold (left H, right E) with curvature k."""
+    return mobius_adde(x, y, k, eps)
 
   @staticmethod
   @partial(jax.jit, static_argnames=("eps",), inline=True)

@@ -37,6 +37,7 @@ Manifold base.
 import jax
 from jax.typing import ArrayLike
 from abc import abstractmethod, ABCMeta
+from .math import EPS
 
 Array = jax.Array
 

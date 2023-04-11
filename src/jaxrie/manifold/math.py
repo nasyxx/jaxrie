@@ -310,11 +310,12 @@ def mobius_add(x: Array, y: Array, k: ArrayLike, eps: float = EPS) -> Array:
   return safe_div(num, denom, eps=eps)
 
 
-# TODO
 @partial(jax.jit, static_argnames=("eps",), inline=True)
 def mobius_adde(x: Array, y: Array, k: ArrayLike, eps: float = EPS) -> Array:
-  """Mobius addition of two vectors x(in H) & y(in E) in manifold with curvature k."""
-  return stereo_expmap(x, stereo_ptrans0(x, y, k, eps=eps), k, eps=eps)
+  """Mobius addition of two vectors x(in H) & y(in E) with curvature k."""
+  return stereo_expmap(
+      x, stereo_ptrans0(x, y, k, eps=eps), k, eps=eps
+  )
 
 
 @partial(jax.jit, static_argnames=("eps",), inline=True)
@@ -537,7 +538,15 @@ def stereo_ptrans(
 @partial(jax.jit, static_argnames=("eps",), inline=True)
 def stereo_ptrans0(y: Array, v: Array, k: ArrayLike, eps: float = EPS) -> Array:
   """Compute the parallel transport of v from the origin to y."""
-  return stereo_ptrans(jnp.zeros_like(y), y, v, k, eps=eps)
+  # NOTE: we do not need to depend on addition.  Thus, we can
+  #       implement addition with parallel transport.
+  # return stereo_ptrans(jnp.zeros_like(y), y, v, k, eps=eps)
+  del eps
+  return (
+      v
+      * lambda_x(jnp.zeros_like(y), k, axis=-1, keepdims=True)
+      / lambda_x(y, k, axis=-1, keepdims=True)
+  )
 
 
 # @partial(jax.jit, static_argnames=("eps",), inline=True)

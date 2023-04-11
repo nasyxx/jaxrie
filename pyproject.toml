@@ -14,7 +14,7 @@ dev = [
 
 [project]
 name = "jaxrie"
-description = "Riemannian with JAX"
+description = "Riemannian JAX"
 authors = [
     {name = "Nasy", email = "nasyxx+git@gmail.com"},
 ]

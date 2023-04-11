@@ -14,7 +14,6 @@ dev = [
 
 [project]
 name = "jaxrie"
-version = "1"
 description = "Riemannian with JAX"
 authors = [
     {name = "Nasy", email = "nasyxx+git@gmail.com"},
@@ -127,7 +126,7 @@ import_heading_plot = "Plot"
 import_heading_thirdparty = "Others"
 
 import_heading_localfolder = "Local"
-known_localfolder = ["sites", "src"]
+known_localfolder = ["sites", "src", "jaxrie"]
 
 import_heading_utils = "Utils"
 known_utils = ["tqdm", "rich"]

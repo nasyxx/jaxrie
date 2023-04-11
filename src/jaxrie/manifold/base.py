@@ -122,3 +122,9 @@ class Manifold(metaclass=ABCMeta):
   def egrad2rgrad(x: Array, grad: Array, k: ArrayLike, eps: float = EPS) -> Array:
     """Euclidean gradient to Riemannian gradient."""
     raise NotImplementedError
+
+  @staticmethod
+  @abstractmethod
+  def proj(x: Array, k: ArrayLike, eps: float = EPS) -> Array:
+    """Projection on manifold with curvature k."""
+    raise NotImplementedError

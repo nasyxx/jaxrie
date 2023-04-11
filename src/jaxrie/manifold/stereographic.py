@@ -51,7 +51,7 @@ from .base import Manifold
 from .math import (EPS, mobius_add, mobius_adde, mobius_matmulh, mobius_matmull,
                    mobius_matmulr, mobius_matvec_mul, mobius_scala_mul,
                    stereo_egrad2rgrad, stereo_expmap, stereo_expmap0,
-                   stereo_logmap, stereo_logmap0)
+                   stereo_logmap, stereo_logmap0, stereo_proj)
 
 Array = jax.Array
 
@@ -136,3 +136,9 @@ class Stereographic(Manifold):
   def egrad2rgrad(x: Array, grad: Array, k: ArrayLike, eps: float = EPS) -> Array:
     """Euclidean gradient to Riemannian gradient."""
     return stereo_egrad2rgrad(x, grad, k, eps=eps)
+
+  @staticmethod
+  @partial(jax.jit, static_argnames=("eps",), inline=True)
+  def proj(x: Array, k: ArrayLike, eps: float = EPS) -> Array:
+    """Projection on manifold with curvature k."""
+    return stereo_proj(x, k, eps=eps)

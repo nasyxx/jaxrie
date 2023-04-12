@@ -57,7 +57,7 @@ class HMLP(hk.Module):
       layers: Sequence[int],
       manifold: Manifold,
       activation: Callable[[Array], Array] = jax.nn.relu,
-      c: ArrayLike | None = None,
+      k: ArrayLike | None = None,
       with_bias: bool = True,
       w_init: hk.initializers.Initializer | None = None,
       b_init: hk.initializers.Initializer | None = None,
@@ -66,12 +66,10 @@ class HMLP(hk.Module):
     """Initialize the Hyperbolic MLP."""
     super().__init__(name=name)
     self.layers = list(
-        map(lambda o: HLinear(o, manifold, c, with_bias, w_init, b_init), layers)
+        map(lambda o: HLinear(o, manifold, k, with_bias, w_init, b_init), layers)
     )
     self.m = manifold
-    self.activation = HAct(activation, manifold, c, c)
-    self.tc = c is None
-    self.c = -1.0 if self.tc else c
+    self.activation = HAct(activation, manifold, k, k)
 
   def __call__(
       self, x: Array, dropout: float | None = None, train: bool = True

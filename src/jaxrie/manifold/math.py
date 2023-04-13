@@ -58,7 +58,7 @@ HALF_EPS = 1e-7
 FN = TypeVar("FN", bound=Callable)
 
 
-@partial(jax.jit, static_argnames=("axis", "ids", "keepdims"), inline=True)
+@partial(jax.jit, static_argnames=("axis", "ids", "keepdims"))
 def select_dim(
     x: Array,
     axis: int,
@@ -74,37 +74,37 @@ def select_dim(
   return x[idx]
 
 
-@partial(jax.jit, static_argnames=("eps",), inline=True)
+@partial(jax.jit, static_argnames=("eps",))
 def safe_div(x: Array, y: Array, eps: float = EPS) -> Array:
   """Safe division."""
   return jnp.divide(x, jnp.maximum(y, eps))
 
 
-@partial(jax.jit, static_argnames=("eps",), inline=True)
+@partial(jax.jit, static_argnames=("eps",))
 def safe_sqrt(x: Array, eps: float = EPS) -> Array:
   """Safe square root."""
   return jnp.sqrt(jnp.maximum(x, eps))
 
 
-@partial(jax.jit, static_argnames=("eps",), inline=True)
+@partial(jax.jit, static_argnames=("eps",))
 def safe_arctanh(x: Array, eps: float = HALF_EPS) -> Array:
   """Safe arctanh."""
   return jnp.arctanh(jnp.clip(x, -1 + eps, 1 - eps))
 
 
-@partial(jax.jit, static_argnames=("eps",), inline=True)
+@partial(jax.jit, static_argnames=("eps",))
 def radius(k: ArrayLike, eps: float = EPS) -> Array:
   """Radius with curvature k in ."""
   return jnp.reciprocal(safe_sqrt(jnp.abs(k), eps=eps))
 
 
-@partial(jax.jit, static_argnames=("eps",), inline=True)
+@partial(jax.jit, static_argnames=("eps",))
 def origin(k: ArrayLike, eps: float = EPS) -> Array:
   """Origin of x."""
   return safe_sqrt(radius(k, eps=eps), eps=eps)
 
 
-@partial(jax.jit, static_argnames=("size",), inline=True)
+@partial(jax.jit, static_argnames=("size",))
 def sh_metric(size: int, k: ArrayLike = -1.0) -> Array:
   """SH metric.
 
@@ -114,7 +114,7 @@ def sh_metric(size: int, k: ArrayLike = -1.0) -> Array:
   return jnp.ones(size).at[0].set(jnp.sign(k))
 
 
-@partial(jax.jit, inline=True)
+@jax.jit
 def sink(x: Array, k: ArrayLike) -> Array:
   """Sine function with curvature k."""
   k = jnp.asarray(k, dtype=x.dtype)
@@ -129,7 +129,7 @@ def sink(x: Array, k: ArrayLike) -> Array:
   )
 
 
-@partial(jax.jit, inline=True)
+@jax.jit
 def cosk(x: Array, k: ArrayLike) -> Array:
   """Cosine function with curvature k."""
   k = jnp.asarray(k, dtype=x.dtype)
@@ -144,7 +144,7 @@ def cosk(x: Array, k: ArrayLike) -> Array:
   )
 
 
-@partial(jax.jit, inline=True)
+@jax.jit
 def tank(x: Array, k: ArrayLike) -> Array:
   """Tangent function with curvature k."""
   k = jnp.asarray(k, dtype=x.dtype)
@@ -159,7 +159,7 @@ def tank(x: Array, k: ArrayLike) -> Array:
   )
 
 
-@partial(jax.jit, inline=True)
+@jax.jit
 def arctank(x: Array, k: ArrayLike) -> Array:
   """Arctangent function with curvature k."""
   k = jnp.asarray(k, dtype=x.dtype)
@@ -174,7 +174,7 @@ def arctank(x: Array, k: ArrayLike) -> Array:
   )
 
 
-@partial(jax.jit, inline=True)
+@jax.jit
 def arcsink(x: Array, k: ArrayLike) -> Array:
   """Arcsine function with curvature k."""
   k = jnp.asarray(k, dtype=x.dtype)
@@ -189,7 +189,7 @@ def arcsink(x: Array, k: ArrayLike) -> Array:
   )
 
 
-@partial(jax.jit, inline=True)
+@jax.jit
 def arccosk(x: Array, k: ArrayLike) -> Array:
   """Arccosine function with curvature k."""
   k = jnp.asarray(k, dtype=x.dtype)
@@ -204,13 +204,13 @@ def arccosk(x: Array, k: ArrayLike) -> Array:
   )
 
 
-@partial(jax.jit, static_argnames=("axis", "keepdims"), inline=True)
+@partial(jax.jit, static_argnames=("axis", "keepdims"))
 def lambda_x(x: Array, k: ArrayLike, axis: int = -1, keepdims: bool = False) -> Array:
   """Calculate the conformal factor."""
   return safe_div(2, (1 + k * sqnorm(x, axis=axis, keepdims=keepdims)))
 
 
-@partial(jax.jit, static_argnames=("axis", "keepdims"), inline=True)
+@partial(jax.jit, static_argnames=("axis", "keepdims"))
 def inner(x: Array, y: Array, axis: int = -1, keepdims: bool = False) -> Array:
   """Inner product of two vectors."""
   if x.ndim == 0:
@@ -218,7 +218,7 @@ def inner(x: Array, y: Array, axis: int = -1, keepdims: bool = False) -> Array:
   return jnp.sum(x * y, axis=axis, keepdims=keepdims)
 
 
-@partial(jax.jit, static_argnames=("axis", "keepdims"), inline=True)
+@partial(jax.jit, static_argnames=("axis", "keepdims"))
 def tangent_inner(
     x: Array, u: Array, v: Array, k: ArrayLike, axis: int = -1, keepdims: bool = False
 ) -> Array:
@@ -228,7 +228,7 @@ def tangent_inner(
   )
 
 
-@partial(jax.jit, static_argnames=("axis", "keepdims"), inline=True)
+@partial(jax.jit, static_argnames=("axis", "keepdims"))
 def minkowski_inner(
     x: Array, y: Array, k: ArrayLike = -1.0, axis: int = -1, keepdims: bool = False
 ) -> Array:
@@ -240,7 +240,7 @@ def minkowski_inner(
   return jnp.sum(g * xy, axis=axis, keepdims=keepdims)
 
 
-@partial(jax.jit, static_argnames=("axis", "keepdims"), inline=True)
+@partial(jax.jit, static_argnames=("axis", "keepdims"))
 def sqnorm(x: Array, axis: int = -1, keepdims: bool = False) -> Array:
   """Squared norm of a vector."""
   if x.ndim == 1:
@@ -248,7 +248,7 @@ def sqnorm(x: Array, axis: int = -1, keepdims: bool = False) -> Array:
   return inner(x, x, axis=axis, keepdims=keepdims)
 
 
-@partial(jax.jit, static_argnames=("axis", "keepdims"), inline=True)
+@partial(jax.jit, static_argnames=("axis", "keepdims"))
 def tangent_sqnorm(
     x: Array, u: Array, k: ArrayLike, axis: int = -1, keepdims: bool = False
 ) -> Array:
@@ -256,7 +256,7 @@ def tangent_sqnorm(
   return tangent_inner(x, u, u, k, axis=axis, keepdims=keepdims)
 
 
-@partial(jax.jit, static_argnames=("axis", "keepdims"), inline=True)
+@partial(jax.jit, static_argnames=("axis", "keepdims"))
 def minkowski_sqnorm(
     x: Array, k: ArrayLike = -1.0, axis: int = -1, keepdims: bool = False
 ) -> Array:
@@ -266,13 +266,13 @@ def minkowski_sqnorm(
   return minkowski_inner(x, x, k=k, axis=axis, keepdims=keepdims)
 
 
-@partial(jax.jit, static_argnames=("axis", "keepdims", "eps"), inline=True)
+@partial(jax.jit, static_argnames=("axis", "keepdims", "eps"))
 def norm(x: Array, axis: int = -1, keepdims: bool = False, eps: float = EPS) -> Array:
   """Norm of a vector."""
   return safe_sqrt(sqnorm(x, axis=axis, keepdims=keepdims), eps=eps)
 
 
-@partial(jax.jit, static_argnames=("axis", "keepdims", "eps"), inline=True)
+@partial(jax.jit, static_argnames=("axis", "keepdims", "eps"))
 def tangent_norm(
     x: Array,
     u: Array,
@@ -287,7 +287,7 @@ def tangent_norm(
   )
 
 
-@partial(jax.jit, static_argnames=("axis", "keepdims", "eps"), inline=True)
+@partial(jax.jit, static_argnames=("axis", "keepdims", "eps"))
 def minkowski_norm(
     x: Array,
     k: ArrayLike = -1.0,
@@ -299,7 +299,7 @@ def minkowski_norm(
   return safe_sqrt(minkowski_sqnorm(x, k=k, axis=axis, keepdims=keepdims), eps=eps)
 
 
-@partial(jax.jit, static_argnames=("eps",), inline=True)
+@partial(jax.jit, static_argnames=("eps",))
 def mobius_add(x: Array, y: Array, k: ArrayLike, eps: float = EPS) -> Array:
   """Mobius addition of two vectors x.y in manifold with curvature k."""
   sqnx = k * sqnorm(x, axis=-1, keepdims=True)
@@ -310,13 +310,13 @@ def mobius_add(x: Array, y: Array, k: ArrayLike, eps: float = EPS) -> Array:
   return safe_div(num, denom, eps=eps)
 
 
-@partial(jax.jit, static_argnames=("eps",), inline=True)
+@partial(jax.jit, static_argnames=("eps",))
 def mobius_adde(x: Array, y: Array, k: ArrayLike, eps: float = EPS) -> Array:
   """Mobius addition of two vectors x(in H) & y(in E) with curvature k."""
   return stereo_expmap(x, stereo_ptrans0(x, y, k, eps=eps), k, eps=eps)
 
 
-@partial(jax.jit, static_argnames=("eps",), inline=True)
+@partial(jax.jit, static_argnames=("eps",))
 def mobius_scala_mul(alpha: Array, x: Array, k: ArrayLike, eps: float = EPS) -> Array:
   """Mobius multiplication of a vector by a scalar in manifold with curvature k."""
   c = radius(k, eps=eps)
@@ -324,7 +324,7 @@ def mobius_scala_mul(alpha: Array, x: Array, k: ArrayLike, eps: float = EPS) -> 
   return tank(alpha * arctank(x_norm, k), k) * x / x_norm
 
 
-@partial(jax.jit, static_argnames=("eps",), inline=True)
+@partial(jax.jit, static_argnames=("eps",))
 def mobius_matvec_mul(m: Array, x: Array, k: ArrayLike, eps: float = EPS) -> Array:
   """Mobius multiplication of a matrix by a vector in manifold with curvature k."""
   if x.ndim > 1:
@@ -347,7 +347,7 @@ def mobius_matvec_mul(m: Array, x: Array, k: ArrayLike, eps: float = EPS) -> Arr
   )
 
 
-@partial(jax.jit, static_argnames=("eps",), inline=True)
+@partial(jax.jit, static_argnames=("eps",))
 def mobius_matmulh(x1: Array, x2: Array, k: ArrayLike, eps: float = EPS) -> Array:
   """Mobius matrix multiplication in H with curvature k."""
   return stereo_expmap0(
@@ -355,7 +355,7 @@ def mobius_matmulh(x1: Array, x2: Array, k: ArrayLike, eps: float = EPS) -> Arra
   )
 
 
-@partial(jax.jit, static_argnames=("eps",), inline=True)
+@partial(jax.jit, static_argnames=("eps",))
 def mobius_matmull(x1: Array, x2: Array, k: ArrayLike, eps: float = EPS) -> Array:
   """Mobius matrix multiplication (left H, right E) with curvature k."""
   axis = -1
@@ -376,7 +376,7 @@ def mobius_matmull(x1: Array, x2: Array, k: ArrayLike, eps: float = EPS) -> Arra
   )
 
 
-@partial(jax.jit, static_argnames=("eps",), inline=True)
+@partial(jax.jit, static_argnames=("eps",))
 def mobius_matmulr(x1: Array, x2: Array, k: ArrayLike, eps: float = EPS) -> Array:
   """Mobius matrix multiplication (left H, right E) with curvature k."""
   # return stereo_expmap0(x1 @ stereo_logmap0(x2, k, eps=eps), k, eps=eps)
@@ -399,7 +399,7 @@ def mobius_matmulr(x1: Array, x2: Array, k: ArrayLike, eps: float = EPS) -> Arra
 
 
 # TODO: implement mobius_left_matmul
-# @partial(jax.jit, static_argnames=("eps",), inline=True)
+# @partial(jax.jit, static_argnames=("eps",))
 def mobius_left_matmul(_m: Array, _x: Array, _k: ArrayLike, _eps: float = EPS) -> Array:
   """Mobius matrix multiplication in manifold with curvature k."""
   raise NotImplementedError
@@ -411,7 +411,7 @@ def mobius_left_matmul(_m: Array, _x: Array, _k: ArrayLike, _eps: float = EPS) -
 #     def wrap(*args, **kwds) ->
 
 
-@partial(jax.jit, static_argnames=("eps",), inline=True)
+@partial(jax.jit, static_argnames=("eps",))
 def sh_add(x: Array, y: Array, k: ArrayLike, eps: float = EPS) -> Array:
   """SH addition of two vectors x.y in SH manifold with curvature k."""
   return sh_expmap(
@@ -422,7 +422,7 @@ def sh_add(x: Array, y: Array, k: ArrayLike, eps: float = EPS) -> Array:
   )
 
 
-@partial(jax.jit, static_argnames=("eps",), inline=True)
+@partial(jax.jit, static_argnames=("eps",))
 def sh_adde(x: Array, y: Array, k: ArrayLike, eps: float = EPS) -> Array:
   """SH addition of two vectors x in L, y in E with curvature k."""
   return sh_expmap(
@@ -433,7 +433,7 @@ def sh_adde(x: Array, y: Array, k: ArrayLike, eps: float = EPS) -> Array:
   )
 
 
-@partial(jax.jit, static_argnames=("eps",), inline=True)
+@partial(jax.jit, static_argnames=("eps",))
 def sh_scalar_mul(m: Array, x: Array, k: ArrayLike, eps: float = EPS) -> Array:
   """SH mix space scalar multiplication with curvature k."""
   return sh_expmap0(
@@ -443,7 +443,7 @@ def sh_scalar_mul(m: Array, x: Array, k: ArrayLike, eps: float = EPS) -> Array:
   )
 
 
-@partial(jax.jit, static_argnames=("eps",), inline=True)
+@partial(jax.jit, static_argnames=("eps",))
 def sh_matmulh(m: Array, x: Array, k: ArrayLike, eps: float = EPS) -> Array:
   """SH hyberbolic space matrix multiplication with curvature k."""
   return sh_expmap0(
@@ -453,7 +453,7 @@ def sh_matmulh(m: Array, x: Array, k: ArrayLike, eps: float = EPS) -> Array:
   )
 
 
-@partial(jax.jit, static_argnames=("eps",), inline=True)
+@partial(jax.jit, static_argnames=("eps",))
 def sh_matmull(m: Array, x: Array, k: ArrayLike, eps: float = EPS) -> Array:
   """SH mix space matrix multiplication (left L, right E) with curvature k."""
   return sh_expmap0(
@@ -463,7 +463,7 @@ def sh_matmull(m: Array, x: Array, k: ArrayLike, eps: float = EPS) -> Array:
   )
 
 
-@partial(jax.jit, static_argnames=("eps",), inline=True)
+@partial(jax.jit, static_argnames=("eps",))
 def sh_matmulr(m: Array, x: Array, k: ArrayLike, eps: float = EPS) -> Array:
   """SH mix space matrix multiplication (left E, right L) with curvature k."""
   return sh_expmap0(
@@ -473,7 +473,7 @@ def sh_matmulr(m: Array, x: Array, k: ArrayLike, eps: float = EPS) -> Array:
   )
 
 
-@partial(jax.jit, static_argnames=("eps",), inline=True)
+@partial(jax.jit, static_argnames=("eps",))
 def gyration(u: Array, v: Array, a: Array, k: ArrayLike, eps: float = EPS) -> Array:
   """Gyration of a vector u around a vector v in manifold with curvature k."""
   return mobius_add(
@@ -484,7 +484,7 @@ def gyration(u: Array, v: Array, a: Array, k: ArrayLike, eps: float = EPS) -> Ar
   )
 
 
-@partial(jax.jit, static_argnames=("eps",), inline=True)
+@partial(jax.jit, static_argnames=("eps",))
 def stereo_proj(x: Array, k: ArrayLike, eps: float = EPS) -> Array:
   """Project x on the manifold with curvature k."""
   c = radius(k, eps=eps)
@@ -496,14 +496,14 @@ def stereo_proj(x: Array, k: ArrayLike, eps: float = EPS) -> Array:
   )
 
 
-@partial(jax.jit, static_argnames=("eps",), inline=True)
+@partial(jax.jit, static_argnames=("eps",))
 def sh_proj(x: Array, k: ArrayLike, eps: float = EPS) -> Array:
   """Project x on the manifold with curvature k."""
   x_norm = minkowski_sqnorm(x, k=0, axis=-1, keepdims=True)
   return x.at[..., :1].set(safe_sqrt(x_norm - (1 / k), eps=eps))
 
 
-@partial(jax.jit, static_argnames=("axis", "eps"), inline=True)
+@partial(jax.jit, static_argnames=("axis", "eps"))
 def stereo_dist(
     x: Array, y: Array, k: ArrayLike, axis: int = -1, eps: float = EPS
 ) -> Array:
@@ -512,7 +512,7 @@ def stereo_dist(
   return 2 * c * arctank(norm(mobius_add(-x, y, k, eps=eps), axis=axis, eps=eps) / c, k)
 
 
-@partial(jax.jit, static_argnames=("axis", "eps"), inline=True)
+@partial(jax.jit, static_argnames=("axis", "eps"))
 def sh_dist(
     x: Array, y: Array, k: ArrayLike, axis: int = -1, eps: float = EPS
 ) -> Array:
@@ -521,7 +521,7 @@ def sh_dist(
   return c * arccosk(k * minkowski_inner(x, y, k=k, axis=axis, keepdims=True), k)
 
 
-@partial(jax.jit, static_argnames=("eps",), inline=True)
+@partial(jax.jit, static_argnames=("eps",))
 def stereo_ptrans(
     x: Array, y: Array, v: Array, k: ArrayLike, eps: float = EPS
 ) -> Array:
@@ -533,7 +533,7 @@ def stereo_ptrans(
   )
 
 
-@partial(jax.jit, static_argnames=("eps",), inline=True)
+@partial(jax.jit, static_argnames=("eps",))
 def stereo_ptrans0(y: Array, v: Array, k: ArrayLike, eps: float = EPS) -> Array:
   """Compute the parallel transport of v from the origin to y."""
   # NOTE: we do not need to depend on addition.  Thus, we can
@@ -547,7 +547,7 @@ def stereo_ptrans0(y: Array, v: Array, k: ArrayLike, eps: float = EPS) -> Array:
   )
 
 
-# @partial(jax.jit, static_argnames=("eps",), inline=True)
+# @partial(jax.jit, static_argnames=("eps",))
 def _sh_ptrans_v1(
     x: Array, y: Array, v: Array, k: ArrayLike, eps: float = EPS
 ) -> Array:
@@ -560,7 +560,7 @@ def _sh_ptrans_v1(
   ) * (logxy + logyx)
 
 
-# @partial(jax.jit, static_argnames=("eps",), inline=True)
+# @partial(jax.jit, static_argnames=("eps",))
 def _sh_ptrans(x: Array, y: Array, v: Array, k: ArrayLike, eps: float = EPS) -> Array:
   """Compute the parallel transport of v from x to y with curvature k."""
   return v - safe_div(
@@ -570,7 +570,7 @@ def _sh_ptrans(x: Array, y: Array, v: Array, k: ArrayLike, eps: float = EPS) -> 
   ) * (x + y)
 
 
-@partial(jax.jit, static_argnames=("eps",), inline=True)
+@partial(jax.jit, static_argnames=("eps",))
 def sh_ptrans(x: Array, y: Array, v: Array, k: ArrayLike, eps: float = EPS) -> Array:
   """Compute the parallel transport of v from x to y with curvature k."""
   return jax.lax.cond(
@@ -580,14 +580,14 @@ def sh_ptrans(x: Array, y: Array, v: Array, k: ArrayLike, eps: float = EPS) -> A
   )
 
 
-@partial(jax.jit, static_argnames=("eps",), inline=True)
+@partial(jax.jit, static_argnames=("eps",))
 def sh_ptrans0(y: Array, v: Array, k: ArrayLike, eps: float = EPS) -> Array:
   """Compute the parallel transport of v from the origin to y with curvature k."""
   c = radius(k, eps=eps)
   return sh_ptrans(jnp.zeros_like(y).at[..., 0].set(c), y, v, k, eps=eps)
 
 
-@partial(jax.jit, static_argnames=("axis", "eps"), inline=True)
+@partial(jax.jit, static_argnames=("axis", "eps"))
 def stereo_expmap(
     x: Array, u: Array, k: ArrayLike, axis: int = -1, eps: float = EPS
 ) -> Array:
@@ -603,13 +603,13 @@ def stereo_expmap(
   )
 
 
-@partial(jax.jit, static_argnames=("axis", "eps"), inline=True)
+@partial(jax.jit, static_argnames=("axis", "eps"))
 def stereo_expmap0(u: Array, k: ArrayLike, axis: int = -1, eps: float = EPS) -> Array:
   """Exponential map at the origin."""
   return stereo_expmap(jnp.zeros_like(u), u, k, axis=axis, eps=eps)
 
 
-@partial(jax.jit, static_argnames=("eps",), inline=True)
+@partial(jax.jit, static_argnames=("eps",))
 def sh_expmap(x: Array, u: Array, k: ArrayLike, eps: float = EPS) -> Array:
   """Exponential map of a tangent vector u at x in L manifold with curvature k."""
   c = radius(k, eps=eps)
@@ -617,7 +617,7 @@ def sh_expmap(x: Array, u: Array, k: ArrayLike, eps: float = EPS) -> Array:
   return (cosk(u_norm, k) * x) + (sink(u_norm, k) * (u / u_norm))
 
 
-@partial(jax.jit, static_argnames=("eps",), inline=True)
+@partial(jax.jit, static_argnames=("eps",))
 def sh_expmap0(u: Array, k: ArrayLike, eps: float = EPS) -> Array:
   """Exponential map at the origin with curvature k."""
   c = radius(k, eps=eps)
@@ -626,7 +626,7 @@ def sh_expmap0(u: Array, k: ArrayLike, eps: float = EPS) -> Array:
   return sh_expmap(x, u, k, eps=eps)
 
 
-@partial(jax.jit, static_argnames=("eps",), inline=True)
+@partial(jax.jit, static_argnames=("eps",))
 def sh_expmap00(u: Array, k: ArrayLike, eps: float = EPS) -> Array:
   """Exponential map at the origin with 0 prepend with curvature k."""
   c = radius(k, eps=eps)
@@ -635,7 +635,7 @@ def sh_expmap00(u: Array, k: ArrayLike, eps: float = EPS) -> Array:
   return sh_expmap(x, u, k, eps=eps)
 
 
-@partial(jax.jit, static_argnames=("axis", "eps"), inline=True)
+@partial(jax.jit, static_argnames=("axis", "eps"))
 def stereo_logmap(
     x: Array, y: Array, k: ArrayLike, axis: int = -1, eps: float = EPS
 ) -> Array:
@@ -652,13 +652,13 @@ def stereo_logmap(
   )
 
 
-@partial(jax.jit, static_argnames=("axis", "eps"), inline=True)
+@partial(jax.jit, static_argnames=("axis", "eps"))
 def stereo_logmap0(y: Array, k: ArrayLike, axis: int = -1, eps: float = EPS) -> Array:
   """Logarithmic map at the origin."""
   return stereo_logmap(jnp.zeros_like(y), y, k, axis=axis, eps=eps)
 
 
-@partial(jax.jit, static_argnames=("eps",), inline=True)
+@partial(jax.jit, static_argnames=("eps",))
 def sh_logmap(x: Array, y: Array, k: ArrayLike, eps: float = EPS) -> Array:
   """Logarithmic map of a SH vector y at x in manifold with curvature k."""
   num = y - k * minkowski_inner(x, y, k=k, axis=-1, keepdims=True) * x
@@ -667,7 +667,7 @@ def sh_logmap(x: Array, y: Array, k: ArrayLike, eps: float = EPS) -> Array:
   )
 
 
-@partial(jax.jit, static_argnames=("eps",), inline=True)
+@partial(jax.jit, static_argnames=("eps",))
 def sh_logmap0(y: Array, k: ArrayLike, eps: float = EPS) -> Array:
   """Logarithmic map at the origin with curvature k."""
   c = radius(k, eps=eps)
@@ -675,19 +675,19 @@ def sh_logmap0(y: Array, k: ArrayLike, eps: float = EPS) -> Array:
   return sh_logmap(x, y, k, eps=eps)
 
 
-@partial(jax.jit, static_argnames=("eps",), inline=True)
+@partial(jax.jit, static_argnames=("eps",))
 def sh_logmap00(y: Array, k: ArrayLike, eps: float = EPS) -> Array:
   """Logarithmic map at the origin with 0 prepend with curvature k."""
   return sh_logmap0(y, k, eps=eps)[..., 1:]
 
 
-@partial(jax.jit, static_argnames=("eps",), inline=True)
+@partial(jax.jit, static_argnames=("eps",))
 def stereo_egrad2rgrad(x: Array, grad: Array, k: ArrayLike, eps: float = EPS) -> Array:
   """Convert Euclidean gradient to Riemannian gradient."""
   return safe_div(grad, lambda_x(x, k, axis=-1, keepdims=True), eps=eps)
 
 
-@partial(jax.jit, static_argnames=("eps",), inline=True)
+@partial(jax.jit, static_argnames=("eps",))
 def sh_egrad2rgrad(x: Array, grad: Array, k: ArrayLike, eps: float = EPS) -> Array:
   """Convert Euclidean gradient to Riemannian gradient."""
   del eps

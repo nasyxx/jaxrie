@@ -48,7 +48,7 @@ class Lorentz(Manifold):
     """Lorentz model."""
 
     @staticmethod
-    @partial(jax.jit, inline=True)
+    @jax.jit
     def add(x: Array, y: Array, k: ArrayLike) -> Array:
         """Addition on manifold with curvature k."""
         pass

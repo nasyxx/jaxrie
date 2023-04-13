@@ -152,9 +152,6 @@ class HGCN(hk.Module):
     super().__init__(name=name)
     self.out_features = out_features
     self.m = manifold
-
-    self.tk = k is None
-    self.k = -1.0 if k is None else k
     self.with_bias = with_bias
 
     w_init = w_init or hk.initializers.VarianceScaling(1.0, "fan_avg", "uniform")

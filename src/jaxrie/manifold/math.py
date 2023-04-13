@@ -168,7 +168,7 @@ def arctank(x: Array, k: ArrayLike) -> Array:
       lambda: x,
       lambda: jax.lax.cond(
           k < 0,
-          lambda: jnp.arctanh(x),
+          lambda: safe_arctanh(x),
           lambda: jnp.arctan(x),
       ),
   )
@@ -207,7 +207,7 @@ def arccosk(x: Array, k: ArrayLike) -> Array:
 @partial(jax.jit, static_argnames=("axis", "keepdims"), inline=True)
 def lambda_x(x: Array, k: ArrayLike, axis: int = -1, keepdims: bool = False) -> Array:
   """Calculate the conformal factor."""
-  return 2 / (1 + k * sqnorm(x, axis=axis, keepdims=keepdims))
+  return safe_div(2, (1 + k * sqnorm(x, axis=axis, keepdims=keepdims)))
 
 
 @partial(jax.jit, static_argnames=("axis", "keepdims"), inline=True)
@@ -313,9 +313,7 @@ def mobius_add(x: Array, y: Array, k: ArrayLike, eps: float = EPS) -> Array:
 @partial(jax.jit, static_argnames=("eps",), inline=True)
 def mobius_adde(x: Array, y: Array, k: ArrayLike, eps: float = EPS) -> Array:
   """Mobius addition of two vectors x(in H) & y(in E) with curvature k."""
-  return stereo_expmap(
-      x, stereo_ptrans0(x, y, k, eps=eps), k, eps=eps
-  )
+  return stereo_expmap(x, stereo_ptrans0(x, y, k, eps=eps), k, eps=eps)
 
 
 @partial(jax.jit, static_argnames=("eps",), inline=True)
@@ -648,7 +646,9 @@ def stereo_logmap(
       2
       * c
       * arctank(norm(sub, axis=axis, keepdims=True, eps=eps) / c, k)
-      * (sub / tangent_norm(x, sub, k, axis=axis, keepdims=True, eps=eps))
+      * safe_div(
+          sub, tangent_norm(x, sub, k, axis=axis, keepdims=True, eps=eps), eps=eps
+      )
   )
 
 

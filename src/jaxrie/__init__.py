@@ -1,8 +1,11 @@
 # Local
-from .manifold import Manifold, Stereographic, math, stereographic
-from .modules import HGCN, HLinear, HAct
+from .manifold import (Euclidean, Manifold, Stereographic, euclidean, math,
+                       stereographic)
+from .modules import HGCN, HAct, HLinear
 
 __all__ = [
+    "Euclidean",
+    "euclidean",
     "Stereographic",
     "stereographic",
     "math",

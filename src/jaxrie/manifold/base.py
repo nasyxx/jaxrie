@@ -45,6 +45,11 @@ Array = jax.Array
 class Manifold(metaclass=ABCMeta):
   """Manifold base."""
 
+  @property
+  def name(self) -> str:
+    """Name of the manifold."""
+    return self.__class__.__name__
+
   @staticmethod
   @abstractmethod
   def add(x: Array, y: Array, k: ArrayLike, eps: float = EPS) -> Array:

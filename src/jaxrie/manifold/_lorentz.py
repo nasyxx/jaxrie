@@ -46,7 +46,7 @@ import jax
 import jax.numpy as jnp
 
 # Local
-from .base import BaseManifold
+from ._base import BaseManifold
 
 Array = jax.Array
 

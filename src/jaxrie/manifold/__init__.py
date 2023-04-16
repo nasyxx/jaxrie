@@ -1,7 +1,7 @@
 # Local
-from .base import BaseManifold as Manifold
-from .euclidean import Euclidean
-from .stereographic import Stereographic
+from ._base import BaseManifold as Manifold
+from ._euclidean import Euclidean
+from ._stereographic import Stereographic
 
 euclidean = Euclidean()
 stereographic = Stereographic()

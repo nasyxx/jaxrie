@@ -44,7 +44,7 @@ from jax.typing import ArrayLike
 import jax
 
 # Local
-from .base import EPS, BaseManifold
+from ._base import EPS, BaseManifold
 
 Array = jax.Array
 

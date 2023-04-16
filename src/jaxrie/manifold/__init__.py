@@ -1,4 +1,5 @@
 # Local
+from . import _math as math
 from ._base import BaseManifold as Manifold
 from ._euclidean import Euclidean
 from ._stereographic import Stereographic
@@ -13,4 +14,5 @@ __all__ = [
     "euclidean",
     "Stereographic",
     "stereographic",
+    "math",
 ]

@@ -39,7 +39,7 @@ from abc import ABCMeta, abstractmethod
 
 # Types
 from jax.typing import ArrayLike
-from typing import TypeVar
+from typing import Protocol
 
 # JAX
 import jax
@@ -50,7 +50,7 @@ from .math import EPS
 Array = jax.Array
 
 
-class BaseManifold(metaclass=ABCMeta):
+class BaseManifold(Protocol, metaclass=ABCMeta):
   """Manifold base."""
 
   @property
@@ -141,6 +141,3 @@ class BaseManifold(metaclass=ABCMeta):
   def proj(x: Array, k: ArrayLike, eps: float = EPS) -> Array:
     """Projection on manifold with curvature k."""
     raise NotImplementedError
-
-
-Manifold = TypeVar("Manifold", bound=BaseManifold)

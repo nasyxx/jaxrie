@@ -1,5 +1,5 @@
 # Local
-from .base import Manifold
+from .base import BaseManifold as Manifold
 from .euclidean import Euclidean
 from .stereographic import Stereographic
 

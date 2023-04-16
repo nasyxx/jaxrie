@@ -34,15 +34,22 @@ license  : GPL-3.0+
 
 This is the module for the Euclidean manifold.
 """
-from .base import Manifold, EPS
-import jax
-from jax.typing import ArrayLike
+# Standard Library
 from functools import partial
+
+# Types
+from jax.typing import ArrayLike
+
+# JAX
+import jax
+
+# Local
+from .base import EPS, BaseManifold
 
 Array = jax.Array
 
 
-class Euclidean(Manifold):
+class Euclidean(BaseManifold):
   """The universal Stereographic projection model."""
 
   @staticmethod

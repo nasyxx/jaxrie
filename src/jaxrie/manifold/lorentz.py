@@ -35,20 +35,27 @@ license  : GPL-3.0+
 Lorentz model.
 """
 
-from .base import Manifold
+# Standard Library
+from functools import partial
+
+# Types
+from jax.typing import ArrayLike
+
+# JAX
 import jax
 import jax.numpy as jnp
-from jax.typing import ArrayLike
-from functools import partial
+
+# Local
+from .base import BaseManifold
 
 Array = jax.Array
 
 
-class Lorentz(Manifold):
-    """Lorentz model."""
+class Lorentz(BaseManifold):
+  """Lorentz model."""
 
-    @staticmethod
-    @jax.jit
-    def add(x: Array, y: Array, k: ArrayLike) -> Array:
-        """Addition on manifold with curvature k."""
-        pass
+  @staticmethod
+  @jax.jit
+  def add(x: Array, y: Array, k: ArrayLike) -> Array:
+    """Addition on manifold with curvature k."""
+    pass

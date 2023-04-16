@@ -35,8 +35,10 @@ license  : GPL-3.0+
 Basic
 """
 
+# Standard Library
+from collections.abc import Callable
+
 # Types
-from typing import Callable
 from jax.typing import ArrayLike
 
 # JAX

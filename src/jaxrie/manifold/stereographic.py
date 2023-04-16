@@ -47,16 +47,16 @@ from jax.typing import ArrayLike
 import jax
 
 # Local
-from .base import Manifold
-from .math import (EPS, mobius_add, mobius_adde, mobius_matmulh, mobius_matmull,
-                   mobius_matmulr, mobius_matvec_mul, mobius_scala_mul,
-                   stereo_egrad2rgrad, stereo_expmap, stereo_expmap0,
-                   stereo_logmap, stereo_logmap0, stereo_proj)
+from .base import BaseManifold
+from .math import (EPS, mobius_add, mobius_adde, mobius_matmulh,
+                   mobius_matmull, mobius_matmulr, mobius_matvec_mul,
+                   mobius_scala_mul, stereo_egrad2rgrad, stereo_expmap,
+                   stereo_expmap0, stereo_logmap, stereo_logmap0, stereo_proj)
 
 Array = jax.Array
 
 
-class Stereographic(Manifold):
+class Stereographic(BaseManifold):
   """The universal Stereographic projection model."""
 
   @staticmethod

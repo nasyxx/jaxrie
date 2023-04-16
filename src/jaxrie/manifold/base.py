@@ -34,15 +34,23 @@ license  : MIT
 
 Manifold base.
 """
-import jax
+# Standard Library
+from abc import ABCMeta, abstractmethod
+
+# Types
 from jax.typing import ArrayLike
-from abc import abstractmethod, ABCMeta
+from typing import TypeVar
+
+# JAX
+import jax
+
+# Local
 from .math import EPS
 
 Array = jax.Array
 
 
-class Manifold(metaclass=ABCMeta):
+class BaseManifold(metaclass=ABCMeta):
   """Manifold base."""
 
   @property
@@ -133,3 +141,6 @@ class Manifold(metaclass=ABCMeta):
   def proj(x: Array, k: ArrayLike, eps: float = EPS) -> Array:
     """Projection on manifold with curvature k."""
     raise NotImplementedError
+
+
+Manifold = TypeVar("Manifold", bound=BaseManifold)

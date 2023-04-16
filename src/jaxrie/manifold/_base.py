@@ -45,7 +45,7 @@ from typing import Protocol
 import jax
 
 # Local
-from .math import EPS
+from ._math import EPS
 
 Array = jax.Array
 

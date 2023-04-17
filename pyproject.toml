@@ -22,7 +22,7 @@ dependencies = [
     "jax>=0.4.6",
     "jaxlib>=0.4.6",
     "dm-haiku>=0.0.9",
-    "optax>=0.1.4",
+    "optax @ git+https://github.com/deepmind/optax.git",
 ]
 requires-python = ">=3.10"
 readme = "README.md"

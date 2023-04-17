@@ -47,15 +47,25 @@ Array = jax.Array
 DK = jax.tree_util.DictKey
 
 
+def get_k(
+    states: hk.State,
+    ks: tuple[DK, DK],
+    idx: int = 0,
+    key: str = "rie_k",
+) -> Array:
+  """Get the curvature."""
+  return states[str(ks[idx].key)][key]
+
+
 def apply_riemannian_updates(
-    params: hk.Params, updates: optax.Updates, manifold: Manifold
+    params: hk.Params, updates: optax.Updates, states: hk.State, manifold: Manifold
 ) -> hk.Params:
   """Apply the riemannian update to the corresponding parameters."""
   return jax.tree_util.tree_map_with_path(
       lambda ks, p, u: jnp.asarray(
-          manifold.expmap(p, u, params[str(ks[0].key)]["rie_k"]).astype(
+          manifold.expmap(p, u, get_k(states, ks)).astype(
               jnp.asarray(p).dtype
-          )
+          ).squeeze()
       ),
       params,
       updates,
@@ -63,30 +73,23 @@ def apply_riemannian_updates(
 
 
 def apply_mix_updates(
-    params: hk.Params, updates: optax.Updates, manifold: Manifold
+    params: hk.Params, updates: optax.Updates, states: hk.State, manifold: Manifold
 ) -> hk.Params:
   """Apply the mix update to the corresponding parameters."""
 
-  def _label_fn(params: hk.Params) -> dict[str, dict[str, str]]:
-    """Generate labels by function for params."""
-    return jax.tree_util.tree_map_with_path(
-        lambda ks, _: "rie" if ks[1].key.startswith("rie") else "euc", params
-    )
-
-  def update_fn(ks: tuple[DK, DK], param: Array, update: Array, label: str) -> Array:
+  def update_fn(ks: tuple[DK, DK], param: Array, update: Array) -> Array:
     """Update the params by the updates."""
     dtype = jnp.asarray(param).dtype
-    if label == "rie":
-      k = params[str(ks[0].key)]["rie_k"]
+    if str(ks[1].key).startswith("rie_"):
+      k = get_k(states, ks)
       return manifold.proj(
           manifold.expmap(param, update, k),
           k,
-      ).astype(dtype)
+      ).astype(dtype).squeeze()
     return jnp.asarray(param + update, dtype=dtype)
 
   return jax.tree_util.tree_map_with_path(
       update_fn,
       params,
       updates,
-      _label_fn(params),
   )

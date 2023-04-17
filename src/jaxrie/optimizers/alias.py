@@ -62,7 +62,7 @@ def _scale_by_learning_rate(
 def riemannian_sgd(
     manifold: Manifold,
     learning_rate: ScalarOrSchedule,
-) -> optax.GradientTransformation:
+) -> optax.GradientTransformationExtraArgs:
   """Run Riemannian Stochastic Gradient Descent optimizer."""
   return optax.chain(
       transform.riemannian_scale(manifold),
@@ -78,7 +78,7 @@ def riemannian_adam(
     eps: float = 1e-8,
     eps_root: float = 1e-8,
     mu_dtype: Any | None = None,
-) -> optax.GradientTransformation:
+) -> optax.GradientTransformationExtraArgs:
   """Run the Riemannian Adam optimizer."""
   return optax.chain(
       transform.riemannian_scale(manifold),
@@ -104,7 +104,7 @@ def riemannian_adamw(
     mu_dtype: Any | None = None,
     weight_decay: float = 1e-4,
     mask: Any | None = None,
-) -> optax.GradientTransformation:
+) -> optax.GradientTransformationExtraArgs:
   """Run the Riemannian AdamW optimizer."""
   return optax.chain(
       transform.riemannian_scale(manifold),
@@ -125,7 +125,7 @@ def rsgd(
     manifold: Manifold,
     elr: ScalarOrSchedule,
     rlr: ScalarOrSchedule,
-) -> optax.GradientTransformation:
+) -> optax.GradientTransformationExtraArgs:
   """Run Riemannian Stochastic Gradient Descent optimizer."""
   return transform.mix_opt(
       optax.sgd(elr),
@@ -139,7 +139,7 @@ def rie_adam(
     rlr: ScalarOrSchedule,
     b1: float = 0.9,
     b2: float = 0.999,
-) -> optax.GradientTransformation:
+) -> optax.GradientTransformationExtraArgs:
   """Run the Riemannian Adam optimizer."""
   return transform.mix_opt(
       optax.adam(elr, b1, b2),
@@ -155,7 +155,7 @@ def rie_adamw(
     b2: float = 0.999,
     weight_decay: float = 1e-4,
     mask: Any | None = None,
-) -> optax.GradientTransformation:
+) -> optax.GradientTransformationExtraArgs:
   """Run the Riemannian AdamW optimizer."""
   return transform.mix_opt(
       optax.adamw(elr, b1, b2, weight_decay=weight_decay, mask=mask),

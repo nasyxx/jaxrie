@@ -127,7 +127,7 @@ class HLinear(hk.Module):
       b = hk.get_parameter("rie_b", [self.out_features], dtype, init=self.b_init)
       out = self.m.proj(self.m.add(out, b, self.k), self.k)
 
-    hk.set_state("k", self.k)
+    hk.set_state("rie_k", self.k)
     return out
 
 
@@ -166,5 +166,5 @@ class HGCN(hk.Module):
     """Apply the layer."""
     out = self.linear(x)
     self.k = self.linear.k
-    hk.set_state("k", self.k)
+    hk.set_state("rie_k", self.k)
     return self.m.proj(self.m.matmulr(adj, out, self.k), self.k)

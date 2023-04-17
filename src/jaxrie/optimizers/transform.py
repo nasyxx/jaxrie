@@ -53,31 +53,21 @@ from optax import bias_correction, update_moment  # type: ignore[attr-defined]
 from optax._src.utils import canonicalize_dtype, cast_tree
 
 # Local
-from .updates import apply_riemannian_updates
+from .updates import apply_riemannian_updates, get_k
 from jaxrie import Manifold
 
 Array = jax.Array
 
 
-def get_k(
-    params: hk.Params,
-    ks: tuple[jax.tree_util.DictKey, jax.tree_util.DictKey],
-    idx: int = 0,
-    key: str = "rie_k",
-) -> Array:
-  """Get the curvature."""
-  return params[str(ks[idx].key)][key]
-
-
 def mix_opt(
     euc: optax.GradientTransformation, rie: optax.GradientTransformation
-) -> optax.GradientTransformation:
+) -> optax.GradientTransformationExtraArgs:
   """Mix euclidean and riemannian optimizer."""
   euc_mask = partial(
-      hk.data_structures.map, lambda _mn, name, _v: name.startswith("euc_")
+      hk.data_structures.map, lambda _, name, _v: not name.startswith("rie_")
   )
   rie_mask = partial(
-      hk.data_structures.map, lambda _mn, name, _v: name.startswith("rie_")
+      hk.data_structures.map, lambda _, name, _v: name.startswith("rie_")
   )
   return optax.chain(
       optax.masked(euc, euc_mask),
@@ -85,7 +75,7 @@ def mix_opt(
   )
 
 
-def riemannian_scale(manifold: Manifold) -> optax.GradientTransformation:
+def riemannian_scale(manifold: Manifold) -> optax.GradientTransformationExtraArgs:
   """Riemannian scale."""
 
   def init_fn(params: optax.Params) -> optax.OptState:
@@ -96,18 +86,20 @@ def riemannian_scale(manifold: Manifold) -> optax.GradientTransformation:
       grads: hk.Params,
       state: optax.OptState,
       params: hk.Params,
+      states: hk.State,
+      eps: float = 4e-3,
   ) -> tuple[hk.Params, optax.OptState]:
     """Update the scale."""
     return (
         jax.tree_util.tree_map_with_path(
-            lambda ks, g, p: manifold.egrad2rgrad(p, g, get_k(params, ks)),
+            lambda ks, g, p: manifold.egrad2rgrad(p, g, get_k(states, ks), eps=eps),
             grads,
             params,
         ),
         state,
     )
 
-  return optax.GradientTransformation(init_fn, update_fn)  # type: ignore[arg-type]
+  return optax.GradientTransformationExtraArgs(init_fn, update_fn)  # type: ignore[arg-type]  # noqa: E501
 
 
 class RieAdamState(NamedTuple):
@@ -126,7 +118,7 @@ def scale_rie_by_adam(
     eps: float = 1e-8,
     eps_root: float = 0.0,
     mu_dtype: Any | None = None,
-) -> optax.GradientTransformation:
+) -> optax.GradientTransformationExtraArgs:
   """Riemannian scale by Adam."""
   mu_dtype = canonicalize_dtype(mu_dtype)
 
@@ -142,6 +134,7 @@ def scale_rie_by_adam(
       grads: hk.Params,
       state: RieAdamState,
       params: hk.Params,
+      states: hk.State,
   ) -> tuple[hk.Params, RieAdamState]:
     """Update the scale."""
     count_inc = cast(Array, optax.safe_int32_increment(state.count_))
@@ -149,7 +142,7 @@ def scale_rie_by_adam(
     mu = update_moment(grads, state.tau, b1, 1)
 
     sqnorm_grads = jax.tree_util.tree_map_with_path(
-        lambda ks, g: manifold.sqnorm(g, get_k(params, ks)), grads
+        lambda ks, g: manifold.sqnorm(g, get_k(states, ks)), grads
     )
     nu = update_moment(sqnorm_grads, state.nu, b2, 1)
 
@@ -161,10 +154,10 @@ def scale_rie_by_adam(
     )
     mu = cast_tree(mu, mu_dtype)
 
-    new_params = apply_riemannian_updates(params, updates, manifold)
+    new_params = apply_riemannian_updates(params, updates, states, manifold)
 
     tau = jax.tree_util.tree_map_with_path(
-        lambda ks, p, np, m: manifold.ptransp(p, np, m, get_k(params, ks)),
+        lambda ks, p, np, m: manifold.ptransp(p, np, m, get_k(states, ks)),
         params,
         new_params,
         mu,
@@ -172,4 +165,4 @@ def scale_rie_by_adam(
 
     return updates, RieAdamState(count_inc, mu, nu, tau)
 
-  return optax.GradientTransformation(init_fn, update_fn)  # type: ignore[arg-type]
+  return optax.GradientTransformationExtraArgs(init_fn, update_fn)  # type: ignore[arg-type]  # noqa: E501

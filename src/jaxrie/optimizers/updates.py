@@ -49,11 +49,13 @@ DK = jax.tree_util.DictKey
 
 def apply_riemannian_updates(
     params: hk.Params, updates: optax.Updates, manifold: Manifold
-) -> optax.Params:
+) -> hk.Params:
   """Apply the riemannian update to the corresponding parameters."""
   return jax.tree_util.tree_map_with_path(
-      lambda mn, _, p, u: jnp.asarray(
-          manifold.expmap(p, u, params[mn]["rie_k"]).astype(jnp.asarray(p).dtype)
+      lambda ks, p, u: jnp.asarray(
+          manifold.expmap(p, u, params[str(ks[0].key)]["rie_k"]).astype(
+              jnp.asarray(p).dtype
+          )
       ),
       params,
       updates,
@@ -62,7 +64,7 @@ def apply_riemannian_updates(
 
 def apply_mix_updates(
     params: hk.Params, updates: optax.Updates, manifold: Manifold
-) -> optax.Params:
+) -> hk.Params:
   """Apply the mix update to the corresponding parameters."""
 
   def _label_fn(params: hk.Params) -> dict[str, dict[str, str]]:

@@ -69,14 +69,15 @@ class HMLP(hk.Module):
         map(lambda o: HLinear(o, manifold, k, with_bias, w_init, b_init), layers)
     )
     self.m = manifold
-    self.activation = HAct(activation, manifold, k, k)
+    self.activation = activation
 
   def __call__(
       self, x: Array, dropout: float | None = None, train: bool = True
   ) -> Array:
     """Forward pass."""
-    for layer in self.layers[:-1]:
-      x = self.activation(layer(x))
+    for layer, nlayer in zip(self.layers[:-1], self.layers[1:], strict=True):
+      x = layer(x)
+      x = HAct(self.activation, self.m, layer.k, nlayer.k)(x)
       if train and dropout is not None:
         x = hk.dropout(hk.next_rng_key(), dropout, x)
 

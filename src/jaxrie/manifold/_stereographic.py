@@ -51,7 +51,8 @@ from ._base import BaseManifold
 from ._math import (EPS, mobius_add, mobius_adde, mobius_matmulh,
                     mobius_matmull, mobius_matmulr, mobius_matvec_mul,
                     mobius_scala_mul, stereo_egrad2rgrad, stereo_expmap,
-                    stereo_expmap0, stereo_logmap, stereo_logmap0, stereo_proj)
+                    stereo_expmap0, stereo_logmap, stereo_logmap0, stereo_proj,
+                    stereo_ptrans, tangent_inner, tangent_norm, tangent_sqnorm)
 
 Array = jax.Array
 
@@ -142,3 +143,27 @@ class Stereographic(BaseManifold):
   def proj(x: Array, k: ArrayLike, eps: float = EPS) -> Array:
     """Projection on manifold with curvature k."""
     return stereo_proj(x, k, eps=eps)
+
+  @staticmethod
+  @partial(jax.jit, static_argnames=("eps",))
+  def norm(x: Array, k: ArrayLike, eps: float = EPS) -> Array:
+    """Norm on manifold with curvature k."""
+    return tangent_norm(x, k, eps=eps, axis=-1, keepdims=True)
+
+  @staticmethod
+  @partial(jax.jit, static_argnames=("eps",))
+  def sqnorm(x: Array, k: ArrayLike, eps: float = EPS) -> Array:
+    """Squared norm on manifold with curvature k."""
+    return tangent_sqnorm(x, k, eps=eps, axis=-1, keepdims=True)
+
+  @staticmethod
+  @partial(jax.jit, static_argnames=("eps",))
+  def inner(x: Array, y: Array, k: ArrayLike, eps: float = EPS) -> Array:
+    """Inner product on manifold with curvature k."""
+    return tangent_inner(x, y, k, eps=eps, axis=-1, keepdims=True)
+
+  @staticmethod
+  @partial(jax.jit, static_argnames=("eps",))
+  def ptransp(x: Array, y: Array, k: ArrayLike, eps: float = EPS) -> Array:
+    """Parallel transport on manifold with curvature k."""
+    return stereo_ptrans(x, y, k, eps=eps)

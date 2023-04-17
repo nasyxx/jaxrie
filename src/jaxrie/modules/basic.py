@@ -37,6 +37,7 @@ Basic
 
 # Standard Library
 from collections.abc import Callable
+from dataclasses import dataclass
 
 # Types
 from jax.typing import ArrayLike
@@ -52,39 +53,31 @@ from jaxrie.manifold import Manifold
 Array = jax.Array
 
 
+def init_wrap(
+    manifold: Manifold, k: ArrayLike, init: hk.initializers.Initializer
+) -> hk.initializers.Initializer:
+  """Wrap the initializer."""
+  return lambda shape, dtype: manifold.expmap0(init(shape, dtype), k)
+
+
+@dataclass
 class HAct(hk.Module):
   """Hyperbolic Activation Layer."""
 
-  def __init__(
-      self,
-      activation: Callable[[Array], Array],
-      manifold: Manifold,
-      kin: ArrayLike | None = None,
-      kout: ArrayLike | None = None,
-      name: str | None = None,
-  ) -> None:
-    """Initialize the layer."""
-    super().__init__(name=name)
-    self.m = manifold
-    self.activation = activation
-
-    self.tkin = kin is None
-    self.tkout = kout is None
-    self.kin = -1.0 if self.tkin else kin
-    self.kout = -1.0 if self.tkout else kout
+  activation: Callable[[Array], Array]
+  manifold: Manifold
+  kin: ArrayLike
+  kout: ArrayLike
 
   def __call__(self, x: Array) -> Array:
     """Apply the layer."""
     dtype = x.dtype
+    m = self.manifold
     self.kin = jnp.array(self.kin, dtype=dtype)
     self.kout = jnp.array(self.kout, dtype=dtype)
-    if self.tkin:
-      self.kin = hk.get_parameter("kin", (), init=hk.initializers.Constant(self.kin))
-    if self.tkout:
-      self.kout = hk.get_parameter("kout", (), init=hk.initializers.Constant(self.kout))
 
-    return self.m.proj(
-        self.m.expmap0(self.activation(self.m.logmap0(x, self.kin)), self.kout),
+    return m.proj(
+        m.expmap0(self.activation(m.logmap0(x, self.kin)), self.kout),
         self.kout,
     )
 
@@ -121,19 +114,20 @@ class HLinear(hk.Module):
 
     self.k = jnp.array(self.k, dtype=dtype)
     if self.tk:
-      self.k = hk.get_parameter("k", (), init=hk.initializers.Constant(self.k))
+      self.k = hk.get_parameter("rie_k", (), init=hk.initializers.Constant(self.k))
 
     if w_init is None:
       stddev = 1.0 / jnp.sqrt(input_size)
-      w_init = hk.initializers.TruncatedNormal(stddev=stddev)
-    w = hk.get_parameter("w", [input_size, self.out_features], dtype, init=w_init)
+      w_init = init_wrap(self.m, self.k, hk.initializers.TruncatedNormal(stddev=stddev))
+    w = hk.get_parameter("rie_w", [input_size, self.out_features], dtype, init=w_init)
 
-    out = self.m.proj(self.m.matmull(x, w, self.k), self.k)
+    out = self.m.proj(self.m.matmul(x, w, self.k), self.k)
 
     if self.with_bias:
-      b = hk.get_parameter("b", [self.out_features], dtype, init=self.b_init)
-      out = self.m.proj(self.m.adde(out, b, self.k), self.k)
+      b = hk.get_parameter("rie_b", [self.out_features], dtype, init=self.b_init)
+      out = self.m.proj(self.m.add(out, b, self.k), self.k)
 
+    hk.set_state("k", self.k)
     return out
 
 
@@ -165,11 +159,12 @@ class HGCN(hk.Module):
         with_bias=with_bias,
         w_init=w_init,
         b_init=b_init,
-        name="hlinear",
+        name="project",
     )
 
   def __call__(self, x: Array, adj: Array) -> Array:
     """Apply the layer."""
     out = self.linear(x)
     self.k = self.linear.k
+    hk.set_state("k", self.k)
     return self.m.proj(self.m.matmulr(adj, out, self.k), self.k)

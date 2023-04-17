@@ -684,7 +684,7 @@ def sh_logmap00(y: Array, k: ArrayLike, eps: float = EPS) -> Array:
 @partial(jax.jit, static_argnames=("eps",))
 def stereo_egrad2rgrad(x: Array, grad: Array, k: ArrayLike, eps: float = EPS) -> Array:
   """Convert Euclidean gradient to Riemannian gradient."""
-  return safe_div(grad, lambda_x(x, k, axis=-1, keepdims=True), eps=eps)
+  return safe_div(grad, lambda_x(x, k, axis=-1, keepdims=True) ** 2, eps=eps)
 
 
 @partial(jax.jit, static_argnames=("eps",))

@@ -42,9 +42,11 @@ from jax.typing import ArrayLike
 
 # JAX
 import jax
+import jax.numpy as jnp
 
 # Local
 from ._base import EPS, BaseManifold
+from ._math import safe_sqrt
 
 Array = jax.Array
 
@@ -145,3 +147,31 @@ class Euclidean(BaseManifold):
     """Projection on manifold with curvature k."""
     del k, eps
     return x
+
+  @staticmethod
+  @partial(jax.jit, static_argnames=("eps",))
+  def norm(x: Array, k: ArrayLike, eps: float = EPS) -> Array:
+    """Norm on manifold with curvature k."""
+    del k
+    return safe_sqrt(jnp.sum(x**2, axis=-1, keepdims=True), eps)
+
+  @staticmethod
+  @partial(jax.jit, static_argnames=("eps",))
+  def sqnorm(x: Array, k: ArrayLike, eps: float = EPS) -> Array:
+    """Squared norm on manifold with curvature k."""
+    del k, eps
+    return jnp.sum(x**2, axis=-1, keepdims=True)
+
+  @staticmethod
+  @partial(jax.jit, static_argnames=("eps",))
+  def inner(x: Array, y: Array, k: ArrayLike, eps: float = EPS) -> Array:
+    """Inner product on manifold with curvature k."""
+    del k, eps
+    return jnp.sum(x * y, axis=-1, keepdims=True)
+
+  @staticmethod
+  @partial(jax.jit, static_argnames=("eps",))
+  def ptransp(x: Array, y: Array, v: Array, k: ArrayLike, eps: float = EPS) -> Array:
+    """Parallel transport on manifold with curvature k."""
+    del x, y, k, eps
+    return v

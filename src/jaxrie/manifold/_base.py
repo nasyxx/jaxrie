@@ -141,3 +141,27 @@ class BaseManifold(Protocol, metaclass=ABCMeta):
   def proj(x: Array, k: ArrayLike, eps: float = EPS) -> Array:
     """Projection on manifold with curvature k."""
     raise NotImplementedError
+
+  @staticmethod
+  @abstractmethod
+  def norm(x: Array, k: ArrayLike, eps: float = EPS) -> Array:
+    """Norm on manifold with curvature k."""
+    raise NotImplementedError
+
+  @staticmethod
+  @abstractmethod
+  def inner(x: Array, y: Array, k: ArrayLike, eps: float = EPS) -> Array:
+    """Inner product on manifold with curvature k."""
+    raise NotImplementedError
+
+  @staticmethod
+  @abstractmethod
+  def sqnorm(x: Array, k: ArrayLike, eps: float = EPS) -> Array:
+    """Squared norm on manifold with curvature k."""
+    raise NotImplementedError
+
+  @staticmethod
+  @abstractmethod
+  def ptransp(x: Array, y: Array, v: Array, k: ArrayLike, eps: float = EPS) -> Array:
+    """Parallel transport on manifold with curvature k."""
+    raise NotImplementedError

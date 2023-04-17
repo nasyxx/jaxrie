@@ -204,10 +204,12 @@ def arccosk(x: Array, k: ArrayLike) -> Array:
   )
 
 
-@partial(jax.jit, static_argnames=("axis", "keepdims"))
-def lambda_x(x: Array, k: ArrayLike, axis: int = -1, keepdims: bool = False) -> Array:
+@partial(jax.jit, static_argnames=("axis", "keepdims", "eps"))
+def lambda_x(
+    x: Array, k: ArrayLike, axis: int = -1, keepdims: bool = False, eps: float = EPS
+) -> Array:
   """Calculate the conformal factor."""
-  return safe_div(2, (1 + k * sqnorm(x, axis=axis, keepdims=keepdims)))
+  return safe_div(2, (1 + k * sqnorm(x, axis=axis, keepdims=keepdims)), eps)
 
 
 @partial(jax.jit, static_argnames=("axis", "keepdims"))
@@ -218,12 +220,18 @@ def inner(x: Array, y: Array, axis: int = -1, keepdims: bool = False) -> Array:
   return jnp.sum(x * y, axis=axis, keepdims=keepdims)
 
 
-@partial(jax.jit, static_argnames=("axis", "keepdims"))
+@partial(jax.jit, static_argnames=("axis", "keepdims", "eps"))
 def tangent_inner(
-    x: Array, u: Array, v: Array, k: ArrayLike, axis: int = -1, keepdims: bool = False
+    x: Array,
+    u: Array,
+    v: Array,
+    k: ArrayLike,
+    axis: int = -1,
+    keepdims: bool = False,
+    eps: float = EPS,
 ) -> Array:
   """Inner product of two tangent vectors."""
-  return (lambda_x(x, k, axis=axis, keepdims=keepdims) ** 2) * inner(
+  return (lambda_x(x, k, axis=axis, keepdims=keepdims, eps=eps) ** 2) * inner(
       u, v, axis=axis, keepdims=keepdims
   )
 
@@ -282,7 +290,7 @@ def tangent_norm(
     eps: float = EPS,
 ) -> Array:
   """Norm of a tangent vector."""
-  return lambda_x(x, k, axis=axis, keepdims=keepdims) * norm(
+  return lambda_x(x, k, axis=axis, keepdims=keepdims, eps=eps) * norm(
       u, axis=axis, keepdims=keepdims, eps=eps
   )
 
@@ -528,8 +536,8 @@ def stereo_ptrans(
   """Compute the parallel transport of v from x to y."""
   return (
       gyration(y, -x, v, k, eps=eps)
-      * lambda_x(x, k, axis=-1, keepdims=True)
-      / lambda_x(y, k, axis=-1, keepdims=True)
+      * lambda_x(x, k, axis=-1, keepdims=True, eps=eps)
+      / lambda_x(y, k, axis=-1, keepdims=True, eps=eps)
   )
 
 
@@ -539,11 +547,10 @@ def stereo_ptrans0(y: Array, v: Array, k: ArrayLike, eps: float = EPS) -> Array:
   # NOTE: we do not need to depend on addition.  Thus, we can
   #       implement addition with parallel transport.
   # return stereo_ptrans(jnp.zeros_like(y), y, v, k, eps=eps)
-  del eps
   return (
       v
-      * lambda_x(jnp.zeros_like(y), k, axis=-1, keepdims=True)
-      / lambda_x(y, k, axis=-1, keepdims=True)
+      * lambda_x(jnp.zeros_like(y), k, axis=-1, keepdims=True, eps=eps)
+      / lambda_x(y, k, axis=-1, keepdims=True, eps=eps)
   )
 
 
@@ -684,7 +691,7 @@ def sh_logmap00(y: Array, k: ArrayLike, eps: float = EPS) -> Array:
 @partial(jax.jit, static_argnames=("eps",))
 def stereo_egrad2rgrad(x: Array, grad: Array, k: ArrayLike, eps: float = EPS) -> Array:
   """Convert Euclidean gradient to Riemannian gradient."""
-  return safe_div(grad, lambda_x(x, k, axis=-1, keepdims=True) ** 2, eps=eps)
+  return safe_div(grad, lambda_x(x, k, axis=-1, keepdims=True, eps=eps) ** 2, eps=eps)
 
 
 @partial(jax.jit, static_argnames=("eps",))

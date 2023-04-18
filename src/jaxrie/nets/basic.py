@@ -57,7 +57,8 @@ class HMLP(hk.Module):
       layers: Sequence[int],
       manifold: Manifold,
       activation: Callable[[Array], Array] = jax.nn.relu,
-      k: ArrayLike | None = None,
+      k: ArrayLike = -1.0,
+      train_k: bool = True,
       with_bias: bool = True,
       w_init: hk.initializers.Initializer | None = None,
       b_init: hk.initializers.Initializer | None = None,
@@ -66,7 +67,10 @@ class HMLP(hk.Module):
     """Initialize the Hyperbolic MLP."""
     super().__init__(name=name)
     self.layers = list(
-        map(lambda o: HLinear(o, manifold, k, with_bias, w_init, b_init), layers)
+        map(
+            lambda o: HLinear(o, manifold, k, train_k, with_bias, w_init, b_init),
+            layers,
+        )
     )
     self.m = manifold
     self.activation = activation

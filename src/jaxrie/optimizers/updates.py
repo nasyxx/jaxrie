@@ -70,12 +70,19 @@ def apply_riemannian_updates(
     k: ArrayLike = -1.0,
 ) -> hk.Params:
   """Apply the riemannian update to the corresponding parameters."""
+
+  def aru_helper(ks: tuple[DK, DK], param: Array, update: Array) -> Array:
+    """Apply the helper function for rie updates."""
+    dtype = jnp.asarray(param).dtype
+    shape = jnp.asarray(param).shape
+    return jnp.asarray(
+        manifold.expmap(param, update, get_k(states, ks, k=k))
+        .astype(dtype)
+        .reshape(shape)
+    )
+
   return jax.tree_util.tree_map_with_path(
-      lambda ks, p, u: jnp.asarray(
-          manifold.expmap(p, u, get_k(states, ks, k=k))
-          .astype(jnp.asarray(p).dtype)
-          .squeeze()
-      ),
+      aru_helper,
       params,
       updates,
   )

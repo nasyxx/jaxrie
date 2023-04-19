@@ -156,7 +156,7 @@ class Euclidean(BaseManifold):
     return safe_sqrt(jnp.sum(x**2, axis=-1, keepdims=True), eps)
 
   @staticmethod
-  @partial(jax.jit, static_argnames=("eps",))
+  @partial(jax.jit)
   def sqnorm(x: Array, k: ArrayLike, eps: float = EPS) -> Array:
     """Squared norm on manifold with curvature k."""
     del k, eps

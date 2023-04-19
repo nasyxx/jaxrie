@@ -154,7 +154,8 @@ class Stereographic(BaseManifold):
   @partial(jax.jit, static_argnames=("eps",))
   def sqnorm(x: Array, k: ArrayLike, eps: float = EPS) -> Array:
     """Squared norm on manifold with curvature k."""
-    return tangent_sqnorm(x, k, eps=eps, axis=-1, keepdims=True)
+    del eps
+    return tangent_sqnorm(x, k, axis=-1, keepdims=True)
 
   @staticmethod
   @partial(jax.jit, static_argnames=("eps",))

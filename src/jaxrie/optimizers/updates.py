@@ -34,6 +34,9 @@ license  : GPL-3.0+
 
 Updates
 """
+# Types
+from jax.typing import ArrayLike
+
 # JAX
 import haiku as hk
 import jax
@@ -52,20 +55,26 @@ def get_k(
     ks: tuple[DK, DK],
     idx: int = 0,
     key: str = "rie_k",
+    k: ArrayLike = -1.0,
 ) -> Array:
   """Get the curvature."""
-  return states[str(ks[idx].key)][key]
+  k = jnp.asarray(k)
+  return states.get(str(ks[idx].key), {key: k})[key]
 
 
 def apply_riemannian_updates(
-    params: hk.Params, updates: optax.Updates, states: hk.State, manifold: Manifold
+    params: hk.Params,
+    updates: optax.Updates,
+    states: hk.State,
+    manifold: Manifold,
+    k: ArrayLike = -1.0,
 ) -> hk.Params:
   """Apply the riemannian update to the corresponding parameters."""
   return jax.tree_util.tree_map_with_path(
       lambda ks, p, u: jnp.asarray(
-          manifold.expmap(p, u, get_k(states, ks)).astype(
-              jnp.asarray(p).dtype
-          ).squeeze()
+          manifold.expmap(p, u, get_k(states, ks, k=k))
+          .astype(jnp.asarray(p).dtype)
+          .squeeze()
       ),
       params,
       updates,
@@ -73,7 +82,11 @@ def apply_riemannian_updates(
 
 
 def apply_mix_updates(
-    params: hk.Params, updates: optax.Updates, states: hk.State, manifold: Manifold
+    params: hk.Params,
+    updates: optax.Updates,
+    states: hk.State,
+    manifold: Manifold,
+    k: ArrayLike = -1.0,
 ) -> hk.Params:
   """Apply the mix update to the corresponding parameters."""
 
@@ -81,11 +94,15 @@ def apply_mix_updates(
     """Update the params by the updates."""
     dtype = jnp.asarray(param).dtype
     if str(ks[1].key).startswith("rie_"):
-      k = get_k(states, ks)
-      return manifold.proj(
-          manifold.expmap(param, update, k),
-          k,
-      ).astype(dtype).squeeze()
+      k_in = get_k(states, ks, k=k)
+      return (
+          manifold.proj(
+              manifold.expmap(param, update, k_in),
+              k_in,
+          )
+          .astype(dtype)
+          .squeeze()
+      )
     return jnp.asarray(param + update, dtype=dtype)
 
   return jax.tree_util.tree_map_with_path(
